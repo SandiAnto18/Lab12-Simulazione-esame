@@ -31,7 +31,14 @@ class Controller:
 
         """handle da una risposta al click """
     def handleCreaGrafo(self, e):
-        pass
+        """informazioni per costruiire il grafo in model"""
+        self._model.buildGraph(self._view._ddrating1.value, self._view._ddrating2.value)
+        """fondamentale svuotare l'area dei risultati vecchi prima di mostrare quelli nuovi"""
+        self._view.txt_result.controls.clear()
+        """comando per aggiungere righe testuali/numero in output"""
+        self._view.txt_result.controls.append(ft.Text("Grafo correttamente creato:"))
+        self._view.txt_result.controls.append(ft.Text(f"Numero di nodi:{self._model.getNumNodi()}"))
+        self._view.txt_result.controls.append(ft.Text(f"Numero di archi:{self._model.getNumEdges()}"))
 
     def handleCammino(self, e):
         pass

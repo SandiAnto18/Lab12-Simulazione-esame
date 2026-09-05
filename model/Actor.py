@@ -7,7 +7,7 @@ class Actor:
     """definisco gli attributi della classe Actor"""
     ActorID: int
     Name: str
-    birth_date: date
+    date_of_birth: date
       #serve a identificare in modo univoco ogni attore nel grafo."""
     def __hash__(self):
         return hash(self.ActorID)

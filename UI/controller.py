@@ -39,6 +39,7 @@ class Controller:
         self._view.txt_result.controls.append(ft.Text("Grafo correttamente creato:"))
         self._view.txt_result.controls.append(ft.Text(f"Numero di nodi:{self._model.getNumNodi()}"))
         self._view.txt_result.controls.append(ft.Text(f"Numero di archi:{self._model.getNumEdges()}"))
+        self._view.update_page()
 
     def handleCammino(self, e):
         pass

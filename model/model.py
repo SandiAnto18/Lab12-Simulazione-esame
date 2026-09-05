@@ -54,8 +54,22 @@ class Model:
                      reverse=True #dal max al min (top 5 di peso maggiore)
                      )
         return edges[:5] #ATTENZIONE POSZIONE 5 ESCLUSA
-    #   quindi edges = [A, B, C, D, E, F, G] resituisce [A, B, C, D, E]
+    #   quindi edges = [A, B, C, D, E, F, G] resituisce [A, B, C, D, E] ($)
 
+#PER DEFINIRE LE COMPONENTI CONNESSE IL MODEL INTERROGA (nx.connected_components(self._graph))
+    #individua tutti i gruppi di nodi collegati tra loro
+    #con list trasformiamo in una lista :components = [
+   # {A, B, C},
+  #  {D, E},
+ #   {F}
+#     ]
+    def getCompConness(self):
+        comp= list(nx.connected_components(self._graph))
+        return comp
+    def getLargestComp(self, comp):
+        largest = max(comp,key=len) # scegli il max (confronta le componenti in base alla loro lunghezza ($))
+        return largest
+        
 
 
 

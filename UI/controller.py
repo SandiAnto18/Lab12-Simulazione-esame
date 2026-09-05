@@ -41,5 +41,27 @@ class Controller:
         self._view.txt_result.controls.append(ft.Text(f"Numero di archi:{self._model.getNumEdges()}"))
         self._view.update_page()
 
+        top5 = self._model.getTop5Edges()
+        self._view.txt_result.controls.append(ft.Text("Top 5 archi:"))
+        for a1,a2,w in top5:
+            self._view.txt_result.controls.append(ft.Text(f"{a1.Name} -> {a2.Name} : {w['weight']}"))
+            # {w['weight']} scrivo così perchè sto usando self._graph.edges(data=True) UN DIZIONARIO
+        self._view.update_page()
+        cc= self._model.getCompConness()
+        #quante componenti ci sono? -> len(lista)
+        self._view.txt_result.controls.append(ft.Text(f"Il grafo ha {len(cc)} componenti connesse"))
+        #largest contiene la lista con più attori (l'insieme che contiene più nodi/attori)
+        largest= self._model.getLargestComp(cc)
+        self._view.txt_result.controls.append(ft.Text(f"La più grande componente connessa ha {len(largest)}:"))
+        #cambia valore a ogni giro del ciclo. a=luca stampa a.Name "luca"
+        #e quindi li prende ad uno  ad uno i valori(attori) della lista
+        for a in largest:
+            self._view.txt_result.controls.append(
+                ft.Text(a.Name)
+            )
+
+        self._view.update_page()
+
+
     def handleCammino(self, e):
         pass

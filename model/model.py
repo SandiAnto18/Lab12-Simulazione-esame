@@ -1,75 +1,109 @@
-"""regola view --> C--> M--> DAO.database"""
-import networkx as nx
+"""REGOLA: VIEW → CONTROLLER → MODEL → DAO → DATABASE"""
 
-"""la logica/i metodi li definisco nel model """
+import networkx as nx
 
 from database.DAO import DAO
 
 
 class Model:
+
     def __init__(self):
-        #crea grafo vuoto per poi aggiugnere nodi e archi durnate "build graph"
-        self._idMap ={}
+        # CREO UN DIZIONARIO CHE ASSOCIA OGNI ACTORID AL RELATIVO OGGETTO ACTOR
+        # ESEMPIO: 10 → OGGETTO ACTOR CON ID 10
+        self._idMap = {}
+
+        # CREO IL GRAFO VUOTO
+        # GLI ATTORI SARANNO I NODI E LE RELAZIONI TRA ATTORI GLI ARCHI
         self._graph = nx.Graph()
+
+
+    # RECUPERO TUTTI I RATING DISPONIBILI DAL DATABASE
     def getRatings(self):
         return DAO.getAllRatings()
-      #il metodo deve sapere che argomenti sta ricevendo da controller,il rating che chiameremo, rat1 2 rat2"""
-    def buildGraph(self,rat1,rat2):
+
+
+    # COSTRUISCO IL GRAFO USANDO IL RANGE DI RATING SCELTO DALL'UTENTE
+    def buildGraph(self, rat1, rat2):
+
+        # PULISCO IL GRAFO NEL CASO VENGA COSTRUITO NUOVAMENTE
         self._graph.clear()
-        #self._actor variabile interna alla classe
-        #viene inizializzato come lista vuota (successivamente riempiremo con lista di oggeti actor)
-        #in output Actors dei film che rientrano nel range (nodi filtrati per range)
-        self._actors = DAO.getAllActorsbyRange(rat1, rat2)
 
-        #variabile a è un oggetto di tipo Actor (preso da self._actors)
-        for a in self._actors:
+        # PULISCO ANCHE LA MAPPA DEGLI ATTORI
+        self._idMap.clear()
+
+        # RECUPERO DAL DATABASE GLI ATTORI DEI FILM
+        # CHE HANNO UN RATING COMPRESO NEL RANGE SCELTO
+        actors = DAO.getAllActorsbyRange(rat1, rat2)
+
+        # INSERISCO GLI ATTORI NELLA MAPPA
+        # LA CHIAVE È L'ACTORID
+        # IL VALORE È L'OGGETTO ACTOR
+        for a in actors:
             self._idMap[a.ActorID] = a
-        #inserisce attori come nodi del grafo
-        self._graph.add_nodes_from(self._actors)
-        #resituisce tutte le coppie di attori e il loro peso (ID e pesi)
-        #funzione() quello tra parentesi lo usa come input
-        #e in output avrò (a1,a2,e w)
-        self._edges=DAO.getAllEdges(rat1, rat2)
-        #creiamo una lista di tuple (a1,a2,w) con ciclo for
-        #con _idMap mappo ogni ActorID all'oggetto Attore corrispondente,
-        #così posso creare archi esistenti,usando i pesi forniti dalDB
-        for e1,e2,w in self._edges:
-            self._graph.add_edge(self._idMap[e1],self._idMap[e2],weight=w)
 
-#legge solo il numero di nodi (quanti attori ci sono)
+        # AGGIUNGO TUTTI GLI ATTORI COME NODI DEL GRAFO
+        self._graph.add_nodes_from(actors)
+
+        # RECUPERO DAL DATABASE LE COPPIE DI ATTORI
+        # E IL PESO DELL'ARCO GIÀ CALCOLATO DAL DATABASE
+        edges = DAO.getAllEdges(rat1, rat2)
+
+        # SCORRO TUTTE LE COPPIE DI ATTORI
+        for actor1, actor2, weight in edges:
+
+            # USO GLI ID PER RECUPERARE DALLA MAPPA
+            # I CORRISPONDENTI OGGETTI ACTOR
+            a1 = self._idMap[actor1]
+            a2 = self._idMap[actor2]
+
+            # CREO L'ARCO TRA I DUE ATTORI
+            # IL PESO È GIÀ STATO CALCOLATO DAL DATABASE
+            self._graph.add_edge(a1, a2, weight=weight)
+
+
+    # RESTITUISCO IL NUMERO DI NODI DEL GRAFO
     def getNumNodi(self):
         return len(self._graph.nodes())
- #legge il numero di archi (relazioni comuni tra attori)  
+
+
+    # RESTITUISCO IL NUMERO DI ARCHI DEL GRAFO
     def getNumEdges(self):
         return len(self._graph.edges())
-#visualizza i 5 archi di peso maggiore
+
+
+    # RECUPERO I 5 ARCHI CON PESO MAGGIORE
     def getTop5Edges(self):
-        #dammi tutti gli archi del grafo (self._graph.) insieme ai loro dati, quindi anche il weight
-        #(Actor1, Actor2, {"weight": 5000000}) , che sono posizione 0,1,2
 
-        #NOTA:self._edges = dati degli archi ricevuti dal DAO.
-        #self._graph.edges(...) = archi effettivamente presenti nel grafo NetworkX.
-        edges=sorted(self._graph.edges(data=True), #SORTED ORDINA ARCHI IN BASE AL WEIGHT
-                     key=lambda e: e[2]['weight'], #che cosa? variabile peso posizione [2][weight]
-                     reverse=True #dal max al min (top 5 di peso maggiore)
-                     )
-        return edges[:5] #ATTENZIONE POSZIONE 5 ESCLUSA
-    #   quindi edges = [A, B, C, D, E, F, G] resituisce [A, B, C, D, E] ($)
+        # RECUPERO TUTTI GLI ARCHI DEL GRAFO
+        # data=True SERVE PER AVERE ANCHE I DATI DELL'ARCO, QUINDI IL PESO
+        edges = list(self._graph.edges(data=True))
 
-#PER DEFINIRE LE COMPONENTI CONNESSE IL MODEL INTERROGA (nx.connected_components(self._graph))
-    #individua tutti i gruppi di nodi collegati tra loro
-    #con list trasformiamo in una lista :components = [
-   # {A, B, C},
-  #  {D, E},
- #   {F}
-#     ]
+        # ORDINO GLI ARCHI DAL PESO MAGGIORE AL PESO MINORE
+        edges.sort(
+            key=lambda e: e[2]["weight"],
+            reverse=True
+        )
+
+        # RESTITUISCO SOLO I PRIMI 5 ARCHI
+        return edges[:5]
+
+
+    # RECUPERO TUTTE LE COMPONENTI CONNESSE DEL GRAFO
     def getCompConness(self):
-        comp= list(nx.connected_components(self._graph))
+
+        # connected_components TROVA I GRUPPI DI NODI COLLEGATI TRA LORO
+        comp = list(nx.connected_components(self._graph))
+
         return comp
+
+
+    # TROVO LA COMPONENTE CONNESSA CON IL MAGGIOR NUMERO DI NODI
     def getLargestComp(self, comp):
-        largest = max(comp,key=len) # scegli il max (confronta le componenti in base alla loro lunghezza ($))
+
+        # MAX CONFRONTA LE COMPONENTI IN BASE AL NUMERO DI NODI
+        largest = max(comp, key=len)
+
         return largest
-        
 
 
 

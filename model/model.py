@@ -76,11 +76,10 @@ class Model:
 
         # RECUPERO TUTTI GLI ARCHI DEL GRAFO
         # data=True SERVE PER AVERE ANCHE I DATI DELL'ARCO, QUINDI IL PESO
-        edges = list(self._graph.edges(data=True))
 
-        # ORDINO GLI ARCHI DAL PESO MAGGIORE AL PESO MINORE
-        edges.sort(
-            key=lambda e: e[2]["weight"],
+        edges = sorted(
+            self._graph.edges(data=True),
+            key=lambda x: x[2]["weight"],
             reverse=True
         )
 

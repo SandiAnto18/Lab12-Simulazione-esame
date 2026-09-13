@@ -14,8 +14,8 @@ class Controller:
 
         # AGGIUNGO OGNI RATING AI DUE DROPDOWN
         for voto in ratings:
-            self._view._ddrating1.options.append(ft.DropdownOption(voto))
-            self._view._ddrating2.options.append(ft.DropdownOption(voto))
+            self._view._ddrating1.options.append(ft.dropdown.Option(voto))
+            self._view._ddrating2.options.append(ft.dropdown.Option(voto))
 
         self._view.update_page()
 
